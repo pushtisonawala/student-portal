@@ -114,6 +114,3 @@ PORT=5000
 4. Push to the branch
 5. Open a pull request
 
-## 📄 License
-
-This project is licensed under the ISC License.
