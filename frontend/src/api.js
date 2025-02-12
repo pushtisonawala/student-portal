@@ -1,10 +1,14 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://student-portal-qvyb.onrender.com/api';
+
+// Add base configuration for axios
+axios.defaults.baseURL = API_URL;
+axios.defaults.headers.post['Content-Type'] = 'application/json';
 
 export const loginUser = async (credentials) => {
   try {
-    const response = await axios.post(`${API_URL}/auth/login`, credentials);
+    const response = await axios.post('/auth/login', credentials);
     return response.data;
   } catch (error) {
     throw error;
@@ -12,14 +16,18 @@ export const loginUser = async (credentials) => {
 };
 
 export const registerUser = async (data) => {
-  const res = await axios.post(`${API_URL}/auth/register`, data);
-  return res.data;
+  try {
+    const response = await axios.post('/auth/register', data);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
 };
 
 export const getProfile = async () => {
   const token = localStorage.getItem('token');
   try {
-    const response = await axios.get(`${API_URL}/profile`, {
+    const response = await axios.get('/profile', {
       headers: {
         'Authorization': `Bearer ${token}`
       }

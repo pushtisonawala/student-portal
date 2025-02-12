@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+const API_URL = 'https://student-portal-qvyb.onrender.com/api';
+
 export default function Dashboard() {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -28,7 +30,7 @@ export default function Dashboard() {
         
         const response = await axios({
           method: 'GET',
-          url: 'http://localhost:5000/api/dashboard',
+          url: `${API_URL}/dashboard`,
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'

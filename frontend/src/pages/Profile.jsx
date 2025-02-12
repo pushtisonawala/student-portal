@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+const API_URL = 'https://student-portal-qvyb.onrender.com/api';
+
 export default function Profile() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -31,7 +33,7 @@ export default function Profile() {
     const fetchProfile = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.get("http://localhost:5000/api/profile", {
+        const response = await axios.get(`${API_URL}/profile`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -107,7 +109,7 @@ export default function Profile() {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "http://localhost:5000/api/profile",
+        `${API_URL}/profile`,
         form,
         {
           headers: {
