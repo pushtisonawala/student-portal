@@ -8,8 +8,11 @@ const app = express();
 
 // Debug middleware - Add before routes
 app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  console.log('\n=== Request ===');
+  console.log(`${req.method} ${req.url}`);
+  console.log('Body:', req.body);
   console.log('Headers:', req.headers);
+  console.log('==============\n');
   next();
 });
 
@@ -32,7 +35,7 @@ app.get("/test", (req, res) => {
 
 // Mount routes
 app.use("/api/auth", authRoutes);
-app.use("/api/profile", profileRoutes);
+app.use("/api/profile", profileRoutes); // Ensure this is mounted before 404 handler
 app.use("/api/dashboard", dashboardRoutes);
 
 // Database connection with SSL options

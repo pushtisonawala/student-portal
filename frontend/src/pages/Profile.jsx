@@ -18,23 +18,11 @@ export default function Profile() {
       state: "",
       zipCode: ""
     },
-    education: {
-      highSchool: {
-        name: "",
-        percentage: "",
-        yearOfCompletion: ""
-      },
-      intermediate: {
-        name: "",
-        percentage: "",
-        yearOfCompletion: ""
-      }
-    },
     marks: {
-      mathematics: "",
-      science: "",
-      english: "",
-      history: ""
+      mathematics: 0,
+      science: 0,
+      english: 0,
+      history: 0
     }
   });
 
@@ -50,7 +38,17 @@ export default function Profile() {
         });
         
         if (response.data) {
-          setForm(response.data);
+          // Ensure marks object exists with default values
+          const profileData = {
+            ...response.data,
+            marks: {
+              mathematics: response.data.marks?.mathematics || 0,
+              science: response.data.marks?.science || 0,
+              english: response.data.marks?.english || 0,
+              history: response.data.marks?.history || 0
+            }
+          };
+          setForm(profileData);
           setIsUpdate(true);
         }
       } catch (err) {
@@ -71,7 +69,7 @@ export default function Profile() {
         ...prev,
         marks: {
           ...prev.marks,
-          [field]: Number(value) || 0
+          [field]: value ? Number(value) : 0
         }
       }));
     } else if (name.includes(".")) {
@@ -235,69 +233,23 @@ export default function Profile() {
           <div className="mb-6">
             <h2 className="text-xl font-semibold mb-4">Academic Marks</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Mathematics
-                </label>
-                <input
-                  type="number"
-                  name="marks.mathematics"
-                  min="0"
-                  max="100"
-                  value={form.marks.mathematics}
-                  onChange={handleChange}
-                  className="w-full p-2 border rounded"
-                  placeholder="Enter marks (0-100)"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Science
-                </label>
-                <input
-                  type="number"
-                  name="marks.science"
-                  min="0"
-                  max="100"
-                  value={form.marks.science}
-                  onChange={handleChange}
-                  className="w-full p-2 border rounded"
-                  placeholder="Enter marks (0-100)"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  English
-                </label>
-                <input
-                  type="number"
-                  name="marks.english"
-                  min="0"
-                  max="100"
-                  value={form.marks.english}
-                  onChange={handleChange}
-                  className="w-full p-2 border rounded"
-                  placeholder="Enter marks (0-100)"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  History
-                </label>
-                <input
-                  type="number"
-                  name="marks.history"
-                  min="0"
-                  max="100"
-                  value={form.marks.history}
-                  onChange={handleChange}
-                  className="w-full p-2 border rounded"
-                  placeholder="Enter marks (0-100)"
-                />
-              </div>
+              {Object.entries(form.marks || {}).map(([subject, mark]) => (
+                <div key={subject}>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {subject.charAt(0).toUpperCase() + subject.slice(1)}
+                  </label>
+                  <input
+                    type="number"
+                    name={`marks.${subject}`}
+                    min="0"
+                    max="100"
+                    value={mark || 0}
+                    onChange={handleChange}
+                    className="w-full p-2 border rounded"
+                    placeholder="Enter marks (0-100)"
+                  />
+                </div>
+              ))}
             </div>
           </div>
 

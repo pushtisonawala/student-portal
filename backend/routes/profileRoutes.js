@@ -13,12 +13,24 @@ const validateDateOfBirth = (dob) => {
 // Get current user's profile
 router.get("/", auth, async (req, res) => {
   try {
+    console.log("Fetching profile for user:", req.user.id);
     const profile = await Profile.findOne({ user: req.user.id });
+    
     if (!profile) {
       return res.status(404).json({ message: "Profile not found" });
     }
-    res.json(profile);
+
+    // Calculate grade and return complete profile
+    const profileData = {
+      ...profile.toObject(),
+      grade: profile.calculatedGrade,
+      average: profile.calculatedAverage
+    };
+
+    console.log("Sending profile data:", profileData);
+    res.json(profileData);
   } catch (error) {
+    console.error("Profile fetch error:", error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -32,49 +44,40 @@ router.get("/test", (req, res) => {
 // Create or update profile
 router.post("/", auth, async (req, res) => {
   try {
-    const { dateOfBirth } = req.body;
-
-    // Validate date of birth
-    if (!validateDateOfBirth(dateOfBirth)) {
-      return res.status(400).json({ 
-        message: "Date of birth must be before 2011" 
-      });
-    }
-
-    const profileFields = {
-      user: req.user.id,
-      ...req.body
-    };
-
+    console.log("Received profile update:", req.body);
+    
     let profile = await Profile.findOne({ user: req.user.id });
     
     if (profile) {
-      // Update
-      profile.set(profileFields);
-      await profile.save(); // This will trigger grade calculation
-      return res.json({ 
-        profile: {
-          ...profile.toObject(),
-          grade: profile.calculatedGrade,
-          average: profile.calculatedAverage
-        },
-        message: "Profile updated successfully" 
+      // Update existing profile
+      profile.set({
+        ...req.body,
+        user: req.user.id
+      });
+    } else {
+      // Create new profile
+      profile = new Profile({
+        ...req.body,
+        user: req.user.id
       });
     }
 
-    // Create
-    profile = new Profile(profileFields);
     await profile.save();
-    res.json({ 
-      profile: {
-        ...profile.toObject(),
-        grade: profile.calculatedGrade,
-        average: profile.calculatedAverage
-      },
-      message: "Profile created successfully" 
+    
+    // Return updated profile with calculated fields
+    const updatedProfile = {
+      ...profile.toObject(),
+      grade: profile.calculatedGrade,
+      average: profile.calculatedAverage
+    };
+
+    console.log("Updated profile:", updatedProfile);
+    res.json({
+      profile: updatedProfile,
+      message: profile.isNew ? "Profile created successfully" : "Profile updated successfully"
     });
   } catch (error) {
-    console.error("Profile operation error:", error);
+    console.error("Profile update error:", error);
     res.status(500).json({ message: error.message });
   }
 });

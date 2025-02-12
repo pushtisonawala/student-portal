@@ -96,12 +96,16 @@ ProfileSchema.virtual('average').get(function() {
   return (totalMarks / validMarks.length).toFixed(2);
 });
 
-// Calculate and save grade before saving
+// Update pre-save hook
 ProfileSchema.pre('save', function(next) {
+  console.log('Pre-save hook triggered with marks:', this.marks);
+  
   if (this.marks) {
     const subjects = ['mathematics', 'science', 'english', 'history'];
     const validMarks = subjects.filter(subject => 
-      typeof this.marks[subject] === 'number' && !isNaN(this.marks[subject])
+      typeof this.marks[subject] === 'number' && 
+      !isNaN(this.marks[subject]) &&
+      this.marks[subject] !== null
     );
 
     if (validMarks.length > 0) {
@@ -118,6 +122,9 @@ ProfileSchema.pre('save', function(next) {
       else if (average >= 60) this.calculatedGrade = 'C';
       else if (average >= 50) this.calculatedGrade = 'D';
       else this.calculatedGrade = 'F';
+
+      console.log('Calculated grade:', this.calculatedGrade);
+      console.log('Calculated average:', this.calculatedAverage);
     }
   }
   next();
