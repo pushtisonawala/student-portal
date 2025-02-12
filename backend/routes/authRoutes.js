@@ -16,27 +16,66 @@ router.post("/register", async (req, res) => {
     const user = new User({ name, email, password: hashedPassword });
     await user.save();
 
-    res.status(201).json({ message: "User registered successfully" });
+    // Generate token after successful registration
+    const token = jwt.sign(
+      { id: user.id },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    // Return token and user data
+    res.status(201).json({
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email
+      },
+      message: "Registration successful"
+    });
   } catch (error) {
+    console.error('Registration error:', error);
     res.status(500).json({ message: "Server Error" });
   }
 });
 
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-
   try {
+    const { email, password } = req.body;
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: "User not found" });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const payload = {
+      id: user.id
+    };
 
-    res.json({ token, user: { name: user.name, email: user.email } });
+    const token = jwt.sign(
+      payload,
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    console.log('Generated token:', token); // Debug log
+
+    res.json({
+      token: token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email
+      }
+    });
   } catch (error) {
-    res.status(500).json({ message: "Server Error" });
+    console.error('Login error:', error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
